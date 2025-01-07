@@ -36,8 +36,12 @@ public class MatchCompleteEventConsumingService(
 
                         var result = consumer.Consume(stoppingToken);
 
-                        var evt = JsonSerializer.Deserialize<Match>(result.Message.Value)
-                                  ?? throw new UnreachableException("null-event.");
+                        var evt = JsonSerializer.Deserialize<Match>(result.Message.Value);
+
+                        if (evt is null)
+                        {
+                            throw new InvalidOperationException("Deserialized event is null.");
+                        }
 
                         await matchMakingService.ProcessMatch(evt);
                     }

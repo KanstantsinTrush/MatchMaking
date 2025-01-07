@@ -39,11 +39,11 @@ public class MatchMakingService(
 
         if (match == null)
         {
-            logger.LogInformation($"No match found for user {userId}.");
+            logger.LogInformation("No match found for user {UserId}.", userId);
             return null;
         }
 
-        logger.LogInformation($"Match found for user {userId}: {match.MatchId}");
+        logger.LogInformation("Match found for user {UserId}: {MatchId}", userId, match.MatchId);
         return match;
     }
 }

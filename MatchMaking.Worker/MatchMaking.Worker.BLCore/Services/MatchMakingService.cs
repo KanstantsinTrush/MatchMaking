@@ -17,10 +17,10 @@ public class MatchMakingService(
     IConnectionMultiplexer redisConnection,
     IOptions<MatchOptions> matchOptions) : IMatchMakingService
 {
-    private const int DefaultUsersPerMatch = 3;
+    private const int DefaultUsersPerMatchCount = 3;
     
     private readonly IDatabase _database = redisConnection.GetDatabase();
-    private readonly int _usersPerMatch = matchOptions.Value.UsersPerMatch ?? DefaultUsersPerMatch;
+    private readonly int _usersPerMatchCount = matchOptions.Value.UsersPerMatchCount ?? DefaultUsersPerMatchCount;
     private readonly IProducer<string, string> _producer = producerFactory.Create<string, string>(logger);
     private readonly RedisKey _matchSetKey = new("kafka:match_set");
     
@@ -30,18 +30,18 @@ public class MatchMakingService(
 
         if (await _database.SortedSetAddAsync(_matchSetKey, userId, score))
         {
-            logger.LogInformation($"User is added to the queue.");
+            logger.LogInformation("User is added to the queue.");
 
             return;
         }
         
-        logger.LogInformation($"User is already in queue.");
+        logger.LogInformation("User is already in queue.");
     }
 
     public async Task ProcessMatch()
     {
-        var usersToMatch = await _database.SortedSetPopAsync(_matchSetKey,_usersPerMatch);
-        if (usersToMatch.Length == 3)
+        var usersToMatch = await _database.SortedSetPopAsync(_matchSetKey, _usersPerMatchCount);
+        if (usersToMatch.Length == _usersPerMatchCount)
         {
             var matchId = Guid.NewGuid().ToString();
             var players = usersToMatch.Select(p => p.Element.ToString()).ToArray();
@@ -49,7 +49,7 @@ public class MatchMakingService(
             var match = new Match(matchId, players.ToList());
             await _producer.ProduceAsync(producerOptions.Value.MatchMakingCompleteEvents, new Message<string, string> { Value = JsonSerializer.Serialize(match) });
             
-            logger.LogInformation($"Match is created: {string.Join(", ", players)}");
+            logger.LogInformation("Match is created: {Users}", string.Join(", ", players));
         }
         else
         {

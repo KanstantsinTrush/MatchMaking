@@ -28,6 +28,6 @@ public class MatchMakingRepository(IConnectionMultiplexer redisConnection) : IMa
         if (matchJson.IsNullOrEmpty)
             return null;
 
-        return JsonSerializer.Deserialize<Match>(matchJson);
+        return JsonSerializer.Deserialize<Match>(matchJson!);
     }
 }

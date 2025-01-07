@@ -10,14 +10,8 @@ public static class RedisHelper
     {
         var redisHost = configuration.GetValue<string>("REDIS_HOST");
         var redisPort = configuration.GetValue<string>("REDIS_PORT");
-        var redisPassword = configuration.GetValue<string>("REDIS_PASSWORD");
 
         var builder = ConfigurationOptions.Parse($"{redisHost}:{redisPort}");
-
-        if (!environment.IsDevelopment())
-        {
-            builder.Password = redisPassword;
-        }
 
         return builder.ToString();
     }

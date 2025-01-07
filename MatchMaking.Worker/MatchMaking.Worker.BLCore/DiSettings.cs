@@ -7,5 +7,5 @@ public static class DiSettings
 {
     public static IServiceCollection AddServices(this IServiceCollection services) =>
         services
-            .AddScoped<IMatchMakingService, MatchMakingService>();
+            .AddSingleton<IMatchMakingService, MatchMakingService>();
 }
